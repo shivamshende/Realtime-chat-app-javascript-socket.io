@@ -10,26 +10,28 @@ const io = require('socket.io')(3000, {
 const users = {};
 
 io.on('connection', socket => {
-  // When a new user joins, store their name with their socket ID
+  console.log('New user connected'); // Debug log
+
   socket.on('new-user', name => {
-    users[socket.id] = name; // Correctly map socket.id to name
+    users[socket.id] = name;
     socket.broadcast.emit('user-connected', name);
+    console.log(`${name} connected`); // Debug log
   });
 
-  // Handle sending a chat message
   socket.on('send-chat-message', message => {
-    const name = users[socket.id]; // Retrieve the name associated with socket.id
+    const name = users[socket.id];
     if (name) {
+      console.log(`Message received from ${name}: ${message}`); // Debug log
       socket.broadcast.emit('chat-message', { message: message, name: name });
     }
   });
 
-  // Handle user disconnection
   socket.on('disconnect', () => {
     const name = users[socket.id];
     if (name) {
       socket.broadcast.emit('user-disconnected', name);
       delete users[socket.id];
+      console.log(`${name} disconnected`); // Debug log
     }
   });
 });
